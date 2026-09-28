@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { isLanguageEnabled } from './languages/isLanguageEnabled';
 
 export interface AutoFilenameConfig {
   enabled: boolean;
@@ -46,12 +47,13 @@ export function isDocumentEnabled(
     return false;
   }
 
-  const languageId = document.languageId;
-  if (matchesAny(languageId, config.excludeLanguages)) {
-    return false;
-  }
-
-  if (!matchesAny(languageId, config.includeLanguages)) {
+  if (
+    !isLanguageEnabled(
+      document.languageId,
+      config.includeLanguages,
+      config.excludeLanguages
+    )
+  ) {
     return false;
   }
 
@@ -64,10 +66,6 @@ export function isDocumentEnabled(
   return matchesGlobList(fileName, config.includeFiles);
 }
 
-function matchesAny(value: string, patterns: string[]): boolean {
-  return patterns.some(pattern => pattern === '*' || pattern === value);
-}
-
 function matchesGlobList(value: string, patterns: string[]): boolean {
   return patterns.some(pattern => globMatches(value, pattern));
 }
@@ -77,7 +75,7 @@ function globMatches(value: string, pattern: string): boolean {
     return true;
   }
 
-  const escaped = pattern.replace(/[.+^${}()|[]\\]/g, '\\$&');
+  const escaped = pattern.replace(/[.+^${}()|[\]\\]/g, '\\$&');
   const expression = escaped.replace(/\*/g, '.*').replace(/\?/g, '.');
 
   return new RegExp(`^${expression}$`, 'i').test(value);
