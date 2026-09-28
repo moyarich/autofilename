@@ -1,90 +1,62 @@
 import * as vscode from 'vscode';
+import {
+  DirectoryReader,
+  getCompletionCandidates
+} from '../core/completionCandidates';
 import { AutoFilenameConfig } from './config';
 import { CompletionPath } from './resolveCompletionPath';
+
+const vscodeDirectoryReader: DirectoryReader<vscode.Uri> = {
+  async readDirectory(uri) {
+    return (await vscode.workspace.fs.readDirectory(uri)).map(([name, type]) => ({
+      name,
+      type
+    }));
+  }
+};
 
 export async function createCompletionItems(
   target: CompletionPath,
   config: AutoFilenameConfig,
   position: vscode.Position
 ): Promise<vscode.CompletionItem[]> {
-  let entries: [string, vscode.FileType][];
-
-  try {
-    entries = await vscode.workspace.fs.readDirectory(target.directory);
-  } catch {
-    return [];
-  }
+  const candidates = await getCompletionCandidates(
+    vscodeDirectoryReader,
+    target.directory,
+    {
+      prefix: target.prefix,
+      trimExtensions: config.trimExtensions,
+      showHiddenFiles: config.showHiddenFiles,
+      foldersFirst: config.foldersFirst,
+      insertTrailingSlash: config.insertTrailingSlash
+    }
+  );
 
   const replacementRange = new vscode.Range(
     position.translate(0, -target.prefix.length),
     position
   );
 
-  return entries
-    .filter(([name]) => config.showHiddenFiles || !name.startsWith('.'))
-    .filter(([name]) =>
-      name.toLowerCase().startsWith(target.prefix.toLowerCase())
-    )
-    .sort((left, right) => compareEntries(left, right, config.foldersFirst))
-    .map(([name, type]) =>
-      createCompletionItem(name, type, config, replacementRange)
+  return candidates.map(candidate => {
+    const item = new vscode.CompletionItem(
+      candidate.insertText,
+      candidate.isDirectory
+        ? vscode.CompletionItemKind.Folder
+        : vscode.CompletionItemKind.File
     );
-}
 
-function createCompletionItem(
-  name: string,
-  type: vscode.FileType,
-  config: AutoFilenameConfig,
-  replacementRange: vscode.Range
-): vscode.CompletionItem {
-  const isDirectory = Boolean(type & vscode.FileType.Directory);
-  const insertText = isDirectory
-    ? config.insertTrailingSlash
-      ? `${name}/`
-      : name
-    : trimExtension(name, config.trimExtensions);
-  const item = new vscode.CompletionItem(
-    insertText,
-    isDirectory
-      ? vscode.CompletionItemKind.Folder
-      : vscode.CompletionItemKind.File
-  );
+    item.textEdit = vscode.TextEdit.replace(
+      replacementRange,
+      candidate.insertText
+    );
 
-  item.textEdit = vscode.TextEdit.replace(replacementRange, insertText);
+    if (candidate.isDirectory && config.continueAfterFolder) {
+      item.command = {
+        command: 'editor.action.triggerSuggest',
+        title: 'Continue path completion'
+      };
+    }
 
-  if (isDirectory && config.continueAfterFolder) {
-    item.command = {
-      command: 'editor.action.triggerSuggest',
-      title: 'Continue path completion'
-    };
-  }
-
-  return item;
-}
-
-function trimExtension(name: string, extensions: Set<string>): string {
-  const lastDot = name.lastIndexOf('.');
-
-  if (lastDot <= 0) {
-    return name;
-  }
-
-  const extension = name.slice(lastDot + 1).toLowerCase();
-
-  return extensions.has(extension) ? name.slice(0, lastDot) : name;
-}
-
-function compareEntries(
-  [leftName, leftType]: [string, vscode.FileType],
-  [rightName, rightType]: [string, vscode.FileType],
-  foldersFirst: boolean
-): number {
-  const leftDirectory = Boolean(leftType & vscode.FileType.Directory);
-  const rightDirectory = Boolean(rightType & vscode.FileType.Directory);
-
-  if (foldersFirst && leftDirectory !== rightDirectory) {
-    return leftDirectory ? -1 : 1;
-  }
-
-  return leftName.localeCompare(rightName);
+    return item;
+  });
 }
