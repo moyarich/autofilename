@@ -113,7 +113,7 @@
     "compile:desktop": "tsc -p ./",
     "compile:web": "esbuild src/extension.ts --bundle --platform=browser --format=cjs --external:vscode --outfile=dist/web/extension.js",
     "test": "npm run test:compile && node --test dist-test/tests/*.test.js",
-    "test:compile": "tsc --module commonjs --moduleResolution node --target ES2022 --esModuleInterop --skipLibCheck --outDir dist-test tests/*.test.ts src/utils/languages/*.ts"
+    "test:compile": "tsc --module commonjs --moduleResolution node --target ES2022 --esModuleInterop --skipLibCheck --outDir dist-test tests/*.test.ts src/core/*.ts src/utils/languages/*.ts"
   },
   "dependencies": {
     "jsonc-parser": "^3.3.1"
