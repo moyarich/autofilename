@@ -21,11 +21,11 @@ export async function createCompletionItems(
   );
 
   return entries
-    .filter(([name]) => !name.startsWith('.'))
+    .filter(([name]) => config.showHiddenFiles || !name.startsWith('.'))
     .filter(([name]) =>
       name.toLowerCase().startsWith(target.prefix.toLowerCase())
     )
-    .sort(compareEntries)
+    .sort((left, right) => compareEntries(left, right, config.foldersFirst))
     .map(([name, type]) =>
       createCompletionItem(name, type, config, replacementRange)
     );
@@ -39,7 +39,9 @@ function createCompletionItem(
 ): vscode.CompletionItem {
   const isDirectory = Boolean(type & vscode.FileType.Directory);
   const insertText = isDirectory
-    ? `${name}/`
+    ? config.insertTrailingSlash
+      ? `${name}/`
+      : name
     : trimExtension(name, config.trimExtensions);
   const item = new vscode.CompletionItem(
     insertText,
@@ -50,7 +52,7 @@ function createCompletionItem(
 
   item.textEdit = vscode.TextEdit.replace(replacementRange, insertText);
 
-  if (isDirectory) {
+  if (isDirectory && config.continueAfterFolder) {
     item.command = {
       command: 'editor.action.triggerSuggest',
       title: 'Continue path completion'
@@ -74,12 +76,13 @@ function trimExtension(name: string, extensions: Set<string>): string {
 
 function compareEntries(
   [leftName, leftType]: [string, vscode.FileType],
-  [rightName, rightType]: [string, vscode.FileType]
+  [rightName, rightType]: [string, vscode.FileType],
+  foldersFirst: boolean
 ): number {
   const leftDirectory = Boolean(leftType & vscode.FileType.Directory);
   const rightDirectory = Boolean(rightType & vscode.FileType.Directory);
 
-  if (leftDirectory !== rightDirectory) {
+  if (foldersFirst && leftDirectory !== rightDirectory) {
     return leftDirectory ? -1 : 1;
   }
 
