@@ -2,6 +2,11 @@ name: Show issue dependency tree
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/show-issue-dependency-tree.yml'
 
 permissions:
   contents: read

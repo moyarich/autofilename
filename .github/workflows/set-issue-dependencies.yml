@@ -2,6 +2,11 @@ name: Set issue dependencies
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/set-issue-dependencies.yml'
 
 permissions:
   contents: read
