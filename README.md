@@ -148,3 +148,9 @@ The extension keeps path resolution URI-first and uses `vscode.workspace.fs` so 
 Desktop builds use the `main` entry point. Web builds use the `browser` entry point.
 
 Platform-specific features must fail gracefully when an equivalent capability is unavailable in a web or virtual extension host; they must not disable the rest of AutoFilename.
+
+### Monaco and other web editors
+
+The completion candidate engine is editor- and filesystem-agnostic. It accepts a small asynchronous directory-reader interface rather than using Node's `fs` API. The VS Code adapter delegates that interface to `vscode.workspace.fs`.
+
+A Monaco integration can reuse the same core with its own URI type and directory reader backed by an in-memory filesystem, browser storage, a remote workspace API, or another virtual filesystem. Tests exercise the core with an in-memory virtual filesystem and do not touch the host filesystem.
