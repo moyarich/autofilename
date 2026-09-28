@@ -6,10 +6,15 @@ interface ProjectConfig {
   paths?: Record<string, string[]>;
 }
 
+export interface AliasResolution {
+  target: vscode.Uri;
+  trailingSlash: boolean;
+}
+
 export async function resolveAlias(
   document: vscode.TextDocument,
   value: string
-): Promise<vscode.Uri | undefined> {
+): Promise<AliasResolution | undefined> {
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
 
   if (!workspaceFolder) {
@@ -49,7 +54,10 @@ export async function resolveAlias(
       continue;
     }
 
-    return vscode.Uri.joinPath(baseUri, normalizeRelativePath(resolved));
+    return {
+      target: vscode.Uri.joinPath(baseUri, normalizeRelativePath(resolved)),
+      trailingSlash: /[/\\]$/.test(value)
+    };
   }
 
   return undefined;
