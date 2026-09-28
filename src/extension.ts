@@ -7,7 +7,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
 function registerPathCompletions(context: vscode.ExtensionContext): void {
   const disposable = vscode.languages.registerCompletionItemProvider(
-    { scheme: 'file', language: '*' },
+    { language: '*' },
     createPathCompletionProvider(),
     '"',
     "'",
