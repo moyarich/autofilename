@@ -1,0 +1,73 @@
+{
+  "name": "autofilename",
+  "displayName": "AutoFilename",
+  "description": "File and folder path completion for VS Code, including aliases, JSON files, and configurable web-root paths.",
+  "version": "0.2.0",
+  "publisher": "moyarich",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "AutoFilename",
+      "properties": {
+        "autofilename.extensions.trim": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "js",
+            "jsx",
+            "ts",
+            "tsx"
+          ],
+          "description": "File extensions to omit from completion labels."
+        },
+        "autofilename.webRoot": {
+          "type": "string",
+          "default": "",
+          "description": "Workspace-relative directory used as the root for paths that start with '/'. Example: 'public'."
+        },
+        "autofilename.suggestOnQuote": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically request path suggestions immediately after typing a quote. Disabled by default to avoid filesystem work for ordinary strings; '/' and '\\\\' still trigger suggestions."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "npm run compile:desktop && npm run compile:web",
+    "watch": "tsc -watch -p ./",
+    "check": "tsc --noEmit -p ./",
+    "vscode:prepublish": "npm run compile",
+    "compile:desktop": "tsc -p ./",
+    "compile:web": "esbuild src/extension.ts --bundle --platform=browser --format=cjs --external:vscode --outfile=dist/web/extension.js"
+  },
+  "dependencies": {
+    "jsonc-parser": "^3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.95.0",
+    "typescript": "^5.7.2",
+    "esbuild": "^0.25.0"
+  },
+  "browser": "./dist/web/extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": {
+      "supported": true
+    }
+  }
+}
