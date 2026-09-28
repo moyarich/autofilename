@@ -61,8 +61,8 @@ jobs:
           jq -r '
             to_entries[]
             | select(
-                (.value.blockedBy | length) > 0
-                or (.value.blocking | length) > 0
+                (.value.blockedBy.nodes | length) > 0
+                or (.value.blocking.nodes | length) > 0
               )
             | .key
           ' "$graph_file" > "$tmp_dir/dependency-nodes.txt"
@@ -70,8 +70,8 @@ jobs:
           jq -r '
             to_entries[]
             | select(
-                (.value.blocking | length) > 0
-                and (.value.blockedBy | length) == 0
+                (.value.blocking.nodes | length) > 0
+                and (.value.blockedBy.nodes | length) == 0
               )
             | .key
           ' "$graph_file" > "$tmp_dir/roots.txt"
@@ -98,7 +98,7 @@ jobs:
             done < <(
               jq -r \
                 --arg key "$number" \
-                '.[$key].blocking[]?.number' \
+                '.[$key].blocking.nodes[]?.number' \
                 "$graph_file"
             )
           }
@@ -106,7 +106,7 @@ jobs:
           {
             echo "# Issue dependency tree"
             echo
-            echo "Arrows are represented top-down: a parent issue blocks the indented issues below it."
+            echo "Top-down: each issue blocks the indented issues below it."
             echo
           } > "$tree_file"
 
@@ -120,7 +120,7 @@ jobs:
             fi
 
             # Show dependency nodes that are not reachable from a normal root,
-            # such as a cycle or an incomplete external relationship.
+            # such as cycles.
             rendered_numbers="$(grep -oE '#[0-9]+' "$tree_file" | tr -d '#' | sort -u || true)"
 
             while IFS= read -r number; do
@@ -129,6 +129,7 @@ jobs:
               if ! grep -Fxq "$number" <<<"$rendered_numbers"; then
                 echo >> "$tree_file"
                 echo "## Unrooted dependency chain" >> "$tree_file"
+                echo >> "$tree_file"
                 render_node "$number" "" ""
               fi
             done < "$tmp_dir/dependency-nodes.txt"
@@ -141,10 +142,22 @@ jobs:
             echo "## Dependency graph JSON"
             echo
             echo '~~~json'
-            jq '.' "$graph_file"
+            jq '
+              with_entries(
+                select(
+                  (.value.blockedBy.nodes | length) > 0
+                  or (.value.blocking.nodes | length) > 0
+                )
+                | .value |= {
+                    number,
+                    title,
+                    state,
+                    blockedBy: [.blockedBy.nodes[]? | {number, title, state, url}],
+                    blocking: [.blocking.nodes[]? | {number, title, state, url}]
+                  }
+              )
+            ' "$graph_file"
             echo '~~~'
           } >> "$GITHUB_STEP_SUMMARY"
 
           cat "$tree_file"
-          echo
-          jq '.' "$graph_file"
