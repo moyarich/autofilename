@@ -4,14 +4,27 @@ import { getConfig } from './config';
 import { getPathText } from './pathText';
 import { resolveCompletionPath } from './resolveCompletionPath';
 
+const QUOTE_TRIGGERS = new Set(['"', "'", '`']);
+
 export function createPathCompletionProvider(): vscode.CompletionItemProvider {
   return {
     async provideCompletionItems(
       document: vscode.TextDocument,
       position: vscode.Position,
-      token: vscode.CancellationToken
+      token: vscode.CancellationToken,
+      context: vscode.CompletionContext
     ): Promise<vscode.CompletionItem[]> {
       if (token.isCancellationRequested) {
+        return [];
+      }
+
+      const config = getConfig(document);
+
+      if (
+        context.triggerCharacter &&
+        QUOTE_TRIGGERS.has(context.triggerCharacter) &&
+        !config.suggestOnQuote
+      ) {
         return [];
       }
 
@@ -21,7 +34,6 @@ export function createPathCompletionProvider(): vscode.CompletionItemProvider {
         return [];
       }
 
-      const config = getConfig(document);
       const target = await resolveCompletionPath(
         document,
         pathText.value,
