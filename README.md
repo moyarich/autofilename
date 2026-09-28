@@ -92,3 +92,11 @@ Default:
 ## Performance
 
 The provider only reads the single directory needed for the current completion request. It does not enumerate all VS Code languages on activation and does not recursively crawl the filesystem.
+
+Automatic completion after typing a quote is disabled by default because quotes occur in many ordinary strings. Path separators still trigger completion automatically, and manual completion still works. To restore quote-triggered suggestions:
+
+```json
+{
+  "autofilename.suggestOnQuote": true
+}
+```
