@@ -91,7 +91,7 @@ async function findNearestProjectConfig(
 async function readProjectConfig(uri: vscode.Uri): Promise<ProjectConfig> {
   try {
     const bytes = await vscode.workspace.fs.readFile(uri);
-    const json = parse(Buffer.from(bytes).toString('utf8')) as {
+    const json = parse(new TextDecoder('utf-8').decode(bytes)) as {
       compilerOptions?: ProjectConfig;
     };
 
