@@ -100,3 +100,14 @@ Automatic completion after typing a quote is disabled by default because quotes 
   "autofilename.suggestOnQuote": true
 }
 ```
+
+
+## VS Code Desktop and Web
+
+AutoFilename supports both VS Code Desktop and VS Code Web.
+
+The extension keeps path resolution URI-first and uses `vscode.workspace.fs` so the same source can run in desktop, browser, remote, and virtual workspace environments when the backing filesystem provider supports directory reads.
+
+Desktop builds use the `main` entry point. Web builds use the `browser` entry point.
+
+Platform-specific features must fail gracefully when an equivalent capability is unavailable in a web or virtual extension host; they must not disable the rest of AutoFilename.
