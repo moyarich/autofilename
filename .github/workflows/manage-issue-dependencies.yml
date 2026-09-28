@@ -33,6 +33,32 @@ on:
         default: false
         type: boolean
 
+  workflow_call:
+    inputs:
+      issue:
+        description: 'Issue number or URL'
+        required: true
+        type: string
+      relationship:
+        description: 'Relationship to the related issue(s)'
+        required: false
+        default: blocked-by
+        type: string
+      action:
+        description: 'Dependency action'
+        required: false
+        default: add
+        type: string
+      related_issues:
+        description: 'Related issue numbers or URLs, comma-separated'
+        required: true
+        type: string
+      dry_run:
+        description: 'Preview the change without applying it'
+        required: false
+        default: false
+        type: boolean
+
 permissions:
   contents: read
   issues: write
