@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 export interface AutoFilenameConfig {
   trimExtensions: Set<string>;
   webRoot: string;
+  suggestOnQuote: boolean;
 }
 
 export function getConfig(document: vscode.TextDocument): AutoFilenameConfig {
@@ -14,6 +15,7 @@ export function getConfig(document: vscode.TextDocument): AutoFilenameConfig {
     trimExtensions: new Set(
       trim.map(extension => extension.replace(/^\./, '').toLowerCase())
     ),
-    webRoot
+    webRoot,
+    suggestOnQuote: config.get<boolean>('suggestOnQuote', false)
   };
 }
