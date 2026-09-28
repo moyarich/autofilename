@@ -41,7 +41,14 @@ Users can narrow or customize behavior:
 }
 ```
 
-Exclusions override inclusions.
+Exclusions override inclusions. An empty `autofilename.languages.include` array disables AutoFilename for every language. Unknown language IDs are safe: they only match when VS Code reports that exact ID (or when `"*"` is included).
+
+### VS Code language IDs
+
+The language settings use VS Code language identifiers, not file extensions. You can see the active editor's ID by running **Developer: Inspect Editor Tokens and Scopes** from the Command Palette and checking the reported language, or consult VS Code's language identifiers reference.
+
+Settings are read for the active document URI on every completion request, so changes take effect without reloading the extension and folder-specific settings work in multi-root workspaces.
+
 
 ## Alias example
 
