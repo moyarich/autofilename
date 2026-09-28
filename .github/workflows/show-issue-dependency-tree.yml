@@ -135,4 +135,16 @@ jobs:
           fi
 
           cat "$tree_file" >> "$GITHUB_STEP_SUMMARY"
+
+          {
+            echo
+            echo "## Dependency graph JSON"
+            echo
+            echo '~~~json'
+            jq '.' "$graph_file"
+            echo '~~~'
+          } >> "$GITHUB_STEP_SUMMARY"
+
           cat "$tree_file"
+          echo
+          jq '.' "$graph_file"
