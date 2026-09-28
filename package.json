@@ -35,6 +35,11 @@
           "type": "string",
           "default": "",
           "description": "Workspace-relative directory used as the root for paths that start with '/'. Example: 'public'."
+        },
+        "autofilename.suggestOnQuote": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically request path suggestions immediately after typing a quote. Disabled by default to avoid filesystem work for ordinary strings; '/' and '\\\\' still trigger suggestions."
         }
       }
     }
