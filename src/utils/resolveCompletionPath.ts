@@ -15,7 +15,7 @@ export async function resolveCompletionPath(
   const alias = await resolveAlias(document, value);
 
   if (alias) {
-    return splitTarget(alias);
+    return splitTarget(alias.target, alias.trailingSlash);
   }
 
   if (value.startsWith('/')) {
@@ -77,7 +77,14 @@ function splitValue(base: vscode.Uri, value: string): CompletionPath {
   return { directory, prefix };
 }
 
-function splitTarget(target: vscode.Uri): CompletionPath {
+function splitTarget(
+  target: vscode.Uri,
+  trailingSlash: boolean
+): CompletionPath {
+  if (trailingSlash) {
+    return { directory: target, prefix: '' };
+  }
+
   const index = target.path.lastIndexOf('/');
 
   return {
