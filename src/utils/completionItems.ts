@@ -45,6 +45,9 @@ export async function createCompletionItems(
         : vscode.CompletionItemKind.File
     );
 
+    // Show the resolved URI without changing the text inserted into the editor.
+    item.detail = vscode.Uri.joinPath(target.directory, candidate.name).toString(true);
+
     item.textEdit = vscode.TextEdit.replace(
       replacementRange,
       candidate.insertText
