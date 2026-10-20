@@ -18,6 +18,7 @@ export interface CompletionCandidateOptions {
   prefix: string;
   trimExtensions: ReadonlySet<string>;
   showHiddenFiles: boolean;
+  excludedNames?: ReadonlySet<string>;
   foldersFirst: boolean;
   insertTrailingSlash: boolean;
 }
@@ -41,6 +42,7 @@ export async function getCompletionCandidates<TUri>(
 
   return entries
     .filter(entry => options.showHiddenFiles || !entry.name.startsWith('.'))
+    .filter(entry => !options.excludedNames?.has(entry.name))
     .filter(entry =>
       entry.name.toLowerCase().startsWith(options.prefix.toLowerCase())
     )
