@@ -36,8 +36,8 @@ export function getConfig(document: vscode.TextDocument): AutoFilenameConfig {
     suggestOnQuote: config.get<boolean>('suggestOnQuote', false),
     showHiddenFiles: config.get<boolean>('showHiddenFiles', false),
     foldersFirst: config.get<boolean>('foldersFirst', true),
-    insertTrailingSlash: config.get<boolean>('insertTrailingSlash', true),
-    continueAfterFolder: config.get<boolean>('continueAfterFolder', true)
+    insertTrailingSlash: config.get<boolean>('autoSlashAfterDirectory', config.get<boolean>('insertTrailingSlash', true)),
+    continueAfterFolder: config.get<boolean>('autoTriggerNextSuggestion', config.get<boolean>('continueAfterFolder', true))
   };
 }
 
