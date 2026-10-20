@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { createCompletionItems } from './completionItems';
 import { getConfig, isDocumentEnabled } from './config';
 import { getPathText } from './pathText';
+import { shouldTrimExtensions } from './trimCompletionExtensions';
 import { resolveCompletionPath } from './resolveCompletionPath';
 
 const QUOTE_TRIGGERS = new Set(['"', "'", '`']);
@@ -48,7 +49,12 @@ export function createPathCompletionProvider(): vscode.CompletionItemProvider {
         return [];
       }
 
-      return createCompletionItems(target, config, position);
+      const openingQuoteIndex = pathText.range.start.character - 1;
+      const beforeQuote = document.lineAt(position.line).text.slice(0, openingQuoteIndex);
+      const effectiveConfig = shouldTrimExtensions(document.languageId, beforeQuote)
+        ? config
+        : { ...config, trimExtensions: new Set<string>() };
+      return createCompletionItems(target, effectiveConfig, position);
     }
   };
 }
