@@ -1,5 +1,5 @@
 import * as assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import { describe, it } from 'vitest';
 import { shouldTrimExtensions } from '../src/utils/trimCompletionExtensions';
 
 describe('extension trimming by completion context', () => {
