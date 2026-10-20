@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { createCompletionItems } from './completionItems';
-import { getConfig } from './config';
+import { getConfig, isDocumentEnabled } from './config';
 import { getPathText } from './pathText';
 import { resolveCompletionPath } from './resolveCompletionPath';
 
@@ -19,6 +19,10 @@ export function createPathCompletionProvider(): vscode.CompletionItemProvider {
       }
 
       const config = getConfig(document);
+
+      if (!isDocumentEnabled(document, config)) {
+        return [];
+      }
 
       if (
         context.triggerCharacter &&

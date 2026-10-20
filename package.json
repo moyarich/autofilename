@@ -18,6 +18,29 @@
     "configuration": {
       "title": "AutoFilename",
       "properties": {
+        "autofilename.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable AutoFilename path completion."
+        },
+        "autofilename.languages.include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "*"
+          ],
+          "description": "VS Code language IDs where AutoFilename is enabled. Use '*' to enable all languages."
+        },
+        "autofilename.languages.exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "VS Code language IDs where AutoFilename is disabled. Exclusions override inclusions."
+        },
         "autofilename.extensions.trim": {
           "type": "array",
           "items": {
@@ -31,6 +54,24 @@
           ],
           "description": "File extensions to omit from completion labels."
         },
+        "autofilename.files.include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "*"
+          ],
+          "description": "File-name glob patterns eligible for completion. '*' means all files."
+        },
+        "autofilename.files.exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "File-name glob patterns excluded from completion. Exclusions override inclusions."
+        },
         "autofilename.webRoot": {
           "type": "string",
           "default": "",
@@ -40,6 +81,26 @@
           "type": "boolean",
           "default": false,
           "description": "Automatically request path suggestions immediately after typing a quote. Disabled by default to avoid filesystem work for ordinary strings; '/' and '\\\\' still trigger suggestions."
+        },
+        "autofilename.showHiddenFiles": {
+          "type": "boolean",
+          "default": false,
+          "description": "Include dotfiles and dot-directories in completion results."
+        },
+        "autofilename.foldersFirst": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sort folders before files in completion results."
+        },
+        "autofilename.insertTrailingSlash": {
+          "type": "boolean",
+          "default": true,
+          "description": "Insert a trailing slash after folder completions."
+        },
+        "autofilename.continueAfterFolder": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically trigger another suggestion after inserting a folder."
         }
       }
     }
@@ -50,7 +111,9 @@
     "check": "tsc --noEmit -p ./",
     "vscode:prepublish": "npm run compile",
     "compile:desktop": "tsc -p ./",
-    "compile:web": "esbuild src/extension.ts --bundle --platform=browser --format=cjs --external:vscode --outfile=dist/web/extension.js"
+    "compile:web": "esbuild src/extension.ts --bundle --platform=browser --format=cjs --external:vscode --outfile=dist/web/extension.js",
+    "test": "npm run test:compile && node --test dist-test/tests/*.test.js",
+    "test:compile": "tsc --module commonjs --moduleResolution node --target ES2022 --esModuleInterop --skipLibCheck --outDir dist-test tests/*.test.ts src/core/*.ts src/utils/languages/*.ts"
   },
   "dependencies": {
     "jsonc-parser": "^3.3.1"
