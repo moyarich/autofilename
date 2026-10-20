@@ -1,0 +1,48 @@
+name: Release AutoFilename
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact version from package.json (without v)
+        type: string
+        required: true
+      release-notes:
+        description: Release notes (required until CHANGELOG.md exists)
+        type: string
+        required: true
+      draft:
+        description: Keep the GitHub Release as a draft
+        type: boolean
+        default: true
+      create-tag:
+        description: Create an immutable v<version> tag on main
+        type: boolean
+        default: false
+      dry-run:
+        description: Preview without creating tags or releases
+        type: boolean
+        default: true
+
+permissions: {}
+
+concurrency:
+  group: autofilename-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Release VS Code extension
+    permissions:
+      contents: write
+    uses: moyarich/reusable-workflows/.github/workflows/reusable_release.yml@main
+    with:
+      version: ${{ inputs.version }}
+      release-tag: ${{ format('v{0}', inputs.version) }}
+      release-name: ${{ format('AutoFilename v{0}', inputs.version) }}
+      release-notes: ${{ inputs.release-notes }}
+      changelog-file: CHANGELOG.md
+      target-ref: main
+      create-tag: ${{ inputs.create-tag }}
+      draft: ${{ inputs.draft }}
+      dry-run: ${{ inputs.dry-run }}
