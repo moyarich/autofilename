@@ -20,6 +20,13 @@ export async function createCompletionItems(
   config: AutoFilenameConfig,
   position: vscode.Position
 ): Promise<vscode.CompletionItem[]> {
+  const excludedNames = new Set<string>();
+  if (config.respectFilesExclude) {
+    const patterns = vscode.workspace.getConfiguration('files', target.directory).get<Record<string, boolean>>('exclude', {});
+    for (const [pattern, excluded] of Object.entries(patterns)) {
+      if (excluded && !pattern.includes('*') && !pattern.includes('?') && !pattern.includes('/')) excludedNames.add(pattern);
+    }
+  }
   const candidates = await getCompletionCandidates(
     vscodeDirectoryReader,
     target.directory,
@@ -27,6 +34,7 @@ export async function createCompletionItems(
       prefix: target.prefix,
       trimExtensions: config.trimExtensions,
       showHiddenFiles: config.showHiddenFiles,
+      excludedNames,
       foldersFirst: config.foldersFirst,
       insertTrailingSlash: config.insertTrailingSlash
     }
