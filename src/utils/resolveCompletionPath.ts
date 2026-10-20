@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { AutoFilenameConfig } from './config';
 import { resolveAlias } from './configPaths';
+import { resolvePathVariables } from './resolvePathVariables';
 
 export interface CompletionPath {
   directory: vscode.Uri;
@@ -12,6 +13,19 @@ export async function resolveCompletionPath(
   value: string,
   config: AutoFilenameConfig
 ): Promise<CompletionPath | undefined> {
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+  if (workspaceFolder) {
+    for (const [prefix, path] of Object.entries(config.mappings)) {
+      if (value !== prefix && !value.startsWith(prefix.endsWith('/') ? prefix : prefix + '/')) continue;
+      const root = resolvePathVariables(path, document) ?? (
+        path.includes('${') ? undefined : vscode.Uri.joinPath(workspaceFolder.uri, path)
+      );
+      if (!root) continue;
+      const suffix = value.slice(prefix.length).replace(/^\\//, '');
+      return splitValue(root, suffix);
+    }
+  }
+
   const alias = await resolveAlias(document, value);
 
   if (alias) {
@@ -40,10 +54,12 @@ function resolveWebRootPath(
     return undefined;
   }
 
-  const root = vscode.Uri.joinPath(
-    workspaceFolder.uri,
-    webRoot.replace(/^[/\\]+|[/\\]+$/g, '')
-  );
+  const root = webRoot.startsWith('${workspaceFolder}')
+    ? resolvePathVariables(webRoot, document)
+    : webRoot.includes('${') ? undefined : vscode.Uri.joinPath(
+        workspaceFolder.uri, webRoot.replace(/^[/\\]+|[/\\]+$/g, '')
+      );
+  if (!root) return undefined;
 
   return splitValue(root, value.slice(1));
 }

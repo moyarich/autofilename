@@ -9,8 +9,10 @@ export interface AutoFilenameConfig {
   excludeFiles: string[];
   trimExtensions: Set<string>;
   webRoot: string;
+  mappings: Record<string, string>;
   suggestOnQuote: boolean;
   showHiddenFiles: boolean;
+  respectFilesExclude: boolean;
   foldersFirst: boolean;
   insertTrailingSlash: boolean;
   continueAfterFolder: boolean;
@@ -31,11 +33,13 @@ export function getConfig(document: vscode.TextDocument): AutoFilenameConfig {
       trim.map(extension => extension.replace(/^\./, '').toLowerCase())
     ),
     webRoot,
+    mappings: config.get<Record<string,string>>('mappings', {}),
     suggestOnQuote: config.get<boolean>('suggestOnQuote', false),
     showHiddenFiles: config.get<boolean>('showHiddenFiles', false),
+    respectFilesExclude: config.get<boolean>('respectFilesExclude', true),
     foldersFirst: config.get<boolean>('foldersFirst', true),
-    insertTrailingSlash: config.get<boolean>('insertTrailingSlash', true),
-    continueAfterFolder: config.get<boolean>('continueAfterFolder', true)
+    insertTrailingSlash: config.get<boolean>('autoSlashAfterDirectory', config.get<boolean>('insertTrailingSlash', true)),
+    continueAfterFolder: config.get<boolean>('autoTriggerNextSuggestion', config.get<boolean>('continueAfterFolder', true))
   };
 }
 

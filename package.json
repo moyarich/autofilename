@@ -101,6 +101,29 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically trigger another suggestion after inserting a folder."
+        },
+        "autofilename.mappings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "Map typed prefixes to workspace-relative paths or ${workspaceFolder} paths."
+        },
+        "autofilename.autoSlashAfterDirectory": {
+          "type": "boolean",
+          "default": true,
+          "description": "Insert a trailing slash after choosing a directory."
+        },
+        "autofilename.autoTriggerNextSuggestion": {
+          "type": "boolean",
+          "default": true,
+          "description": "Trigger another completion after inserting a directory slash."
+        },
+        "autofilename.respectFilesExclude": {
+          "type": "boolean",
+          "default": true,
+          "description": "Hide files and folders excluded by VS Code files.exclude settings."
         }
       }
     }
