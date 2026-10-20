@@ -1,6 +1,14 @@
 import * as vscode from 'vscode';
 import { parse } from 'jsonc-parser';
 
+const projectConfigCache = new Map<string, ProjectConfig>();
+
+/** Invalidate parsed project configuration when its source changes. */
+export function invalidateProjectConfig(uri?: vscode.Uri): void {
+  if (uri) projectConfigCache.delete(uri.toString());
+  else projectConfigCache.clear();
+}
+
 interface ProjectConfig {
   baseUrl?: string;
   paths?: Record<string, string[]>;
@@ -89,16 +97,21 @@ async function findNearestProjectConfig(
 }
 
 async function readProjectConfig(uri: vscode.Uri): Promise<ProjectConfig> {
+  const key = uri.toString();
+  const cached = projectConfigCache.get(key);
+  if (cached) return cached;
   try {
     const bytes = await vscode.workspace.fs.readFile(uri);
     const json = parse(new TextDecoder('utf-8').decode(bytes)) as {
       compilerOptions?: ProjectConfig;
     };
 
-    return {
+    const parsed: ProjectConfig = {
       baseUrl: json?.compilerOptions?.baseUrl,
       paths: json?.compilerOptions?.paths
     };
+    projectConfigCache.set(key, parsed);
+    return parsed;
   } catch {
     return {};
   }
