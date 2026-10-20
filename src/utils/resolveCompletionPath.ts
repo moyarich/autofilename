@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { AutoFilenameConfig } from './config';
 import { resolveAlias } from './configPaths';
+import { resolvePathVariables } from './resolvePathVariables';
 
 export interface CompletionPath {
   directory: vscode.Uri;
