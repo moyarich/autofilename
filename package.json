@@ -109,6 +109,16 @@
           },
           "default": {},
           "description": "Map typed prefixes to workspace-relative paths or ${workspaceFolder} paths."
+        },
+        "autofilename.autoSlashAfterDirectory": {
+          "type": "boolean",
+          "default": true,
+          "description": "Insert a trailing slash after choosing a directory."
+        },
+        "autofilename.autoTriggerNextSuggestion": {
+          "type": "boolean",
+          "default": true,
+          "description": "Trigger another completion after inserting a directory slash."
         }
       }
     }
