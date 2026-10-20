@@ -4,7 +4,9 @@ export function shouldTrimExtensions(languageId: string, beforeOpeningQuote: str
     return false;
   }
 
-  // Preserve whitespace immediately before the opening quote: `import 'path'`\n  // and `export ... from 'path'` rely on it for context detection.\n  const before = beforeOpeningQuote;
+  // Preserve whitespace immediately before the opening quote: `import 'path'`
+  // and `export ... from 'path'` rely on it for context detection.
+  const before = beforeOpeningQuote;
   return /\b(?:import|export)\s+(?:[^'"\n]*?\s+from\s*)?$/.test(before)
     || /\b(?:require|import)\s*\(\s*$/.test(before);
 }
