@@ -119,6 +119,11 @@
           "type": "boolean",
           "default": true,
           "description": "Trigger another completion after inserting a directory slash."
+        },
+        "autofilename.respectFilesExclude": {
+          "type": "boolean",
+          "default": true,
+          "description": "Hide files and folders excluded by VS Code files.exclude settings."
         }
       }
     }
