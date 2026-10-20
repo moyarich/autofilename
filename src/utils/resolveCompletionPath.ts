@@ -41,10 +41,12 @@ function resolveWebRootPath(
     return undefined;
   }
 
-  const root = vscode.Uri.joinPath(
-    workspaceFolder.uri,
-    webRoot.replace(/^[/\\]+|[/\\]+$/g, '')
-  );
+  const root = webRoot.startsWith('${workspaceFolder}')
+    ? resolvePathVariables(webRoot, document)
+    : webRoot.includes('${') ? undefined : vscode.Uri.joinPath(
+        workspaceFolder.uri, webRoot.replace(/^[/\\]+|[/\\]+$/g, '')
+      );
+  if (!root) return undefined;
 
   return splitValue(root, value.slice(1));
 }
