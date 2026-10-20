@@ -53,7 +53,7 @@ export async function createCompletionItems(
       candidate.insertText
     );
 
-    if (candidate.isDirectory && config.continueAfterFolder) {
+    if (candidate.isDirectory && config.continueAfterFolder && config.insertTrailingSlash) {
       item.command = {
         command: 'editor.action.triggerSuggest',
         title: 'Continue path completion'
