@@ -2,7 +2,7 @@
   "name": "autofilename",
   "displayName": "AutoFilename",
   "description": "File and folder path completion for VS Code, including aliases, JSON files, and configurable web-root paths.",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "publisher": "moyarich",
   "engines": {
     "vscode": "^1.95.0"
