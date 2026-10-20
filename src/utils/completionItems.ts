@@ -23,8 +23,16 @@ export async function createCompletionItems(
   const excludedNames = new Set<string>();
   if (config.respectFilesExclude) {
     const patterns = vscode.workspace.getConfiguration('files', target.directory).get<Record<string, boolean>>('exclude', {});
-    for (const [pattern, excluded] of Object.entries(patterns)) {
-      if (excluded && !pattern.includes('*') && !pattern.includes('?') && !pattern.includes('/')) excludedNames.add(pattern);
+    const folder = vscode.workspace.getWorkspaceFolder(target.directory);
+    const relativeDirectory = folder
+      ? target.directory.path.slice(folder.uri.path.length).replace(/^\//, '')
+      : '';
+    const entries = await vscodeDirectoryReader.readDirectory(target.directory).catch(() => []);
+    for (const entry of entries) {
+      const relativePath = [relativeDirectory, entry.name].filter(Boolean).join('/');
+      if (Object.entries(patterns).some(([pattern, enabled]) => enabled && matchesExcludePattern(pattern, entry.name, relativePath))) {
+        excludedNames.add(entry.name);
+      }
     }
   }
   const candidates = await getCompletionCandidates(
@@ -70,4 +78,13 @@ export async function createCompletionItems(
 
     return item;
   });
+}
+
+/** Match common VS Code glob exclusions against both filenames and relative paths. */
+function matchesExcludePattern(pattern: string, name: string, path: string): boolean {
+  const escape = (value: string): string => value.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  const normalized = pattern.replace(/\\/g, '/').replace(/^\//, '');
+  const segments = normalized.split('**');
+  const regex = new RegExp('^' + segments.map(part => escape(part).replace(/\\\*/g, '[^/]*').replace(/\\\?/g, '[^/]')).join('.*') + '$');
+  return regex.test(normalized.includes('/') ? path : name);
 }
