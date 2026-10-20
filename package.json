@@ -101,6 +101,14 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically trigger another suggestion after inserting a folder."
+        },
+        "autofilename.mappings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {},
+          "description": "Map typed prefixes to workspace-relative paths or ${workspaceFolder} paths."
         }
       }
     }
