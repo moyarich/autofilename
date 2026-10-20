@@ -13,6 +13,19 @@ export async function resolveCompletionPath(
   value: string,
   config: AutoFilenameConfig
 ): Promise<CompletionPath | undefined> {
+  const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+  if (workspaceFolder) {
+    for (const [prefix, path] of Object.entries(config.mappings)) {
+      if (value !== prefix && !value.startsWith(prefix.endsWith('/') ? prefix : prefix + '/')) continue;
+      const root = resolvePathVariables(path, document) ?? (
+        path.includes('${') ? undefined : vscode.Uri.joinPath(workspaceFolder.uri, path)
+      );
+      if (!root) continue;
+      const suffix = value.slice(prefix.length).replace(/^\\//, '');
+      return splitValue(root, suffix);
+    }
+  }
+
   const alias = await resolveAlias(document, value);
 
   if (alias) {
