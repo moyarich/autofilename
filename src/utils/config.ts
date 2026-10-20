@@ -9,6 +9,7 @@ export interface AutoFilenameConfig {
   excludeFiles: string[];
   trimExtensions: Set<string>;
   webRoot: string;
+  mappings: Record<string, string>;
   suggestOnQuote: boolean;
   showHiddenFiles: boolean;
   foldersFirst: boolean;
@@ -31,6 +32,7 @@ export function getConfig(document: vscode.TextDocument): AutoFilenameConfig {
       trim.map(extension => extension.replace(/^\./, '').toLowerCase())
     ),
     webRoot,
+    mappings: config.get<Record<string,string>>('mappings', {}),
     suggestOnQuote: config.get<boolean>('suggestOnQuote', false),
     showHiddenFiles: config.get<boolean>('showHiddenFiles', false),
     foldersFirst: config.get<boolean>('foldersFirst', true),
