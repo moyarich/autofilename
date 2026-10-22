@@ -135,7 +135,8 @@
     "vscode:prepublish": "npm run compile",
     "compile:desktop": "tsc -p ./",
     "compile:web": "esbuild src/extension.ts --bundle --platform=browser --format=cjs --external:vscode --outfile=dist/web/extension.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "check:web": "npm run compile:web && node -e \"const fs=require('node:fs');const f='dist/web/extension.js';const text=fs.readFileSync(f,'utf8');if(!text.includes('activate')||text.includes('node:fs'))process.exit(1)\""
   },
   "dependencies": {
     "jsonc-parser": "^3.3.1"
