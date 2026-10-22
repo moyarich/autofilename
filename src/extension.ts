@@ -7,6 +7,8 @@ export function activate(context: vscode.ExtensionContext): void {
 
 function registerPathCompletions(context: vscode.ExtensionContext): void {
   const disposable = vscode.languages.registerCompletionItemProvider(
+    // Deliberately do not constrain `scheme`: remote and virtual providers use
+    // their own URI schemes, which workspace.fs can read.
     { language: '*' },
     createPathCompletionProvider(),
     '"',
