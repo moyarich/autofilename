@@ -1,53 +1,77 @@
-name: Restore AutoFilename release
+name: Restore Release
+
+run-name: >-
+  Restore release · ${{ inputs.package }} · ${{ inputs.restore-source }} · dry-run=${{
+  inputs.dry-run }}
 
 on:
   workflow_dispatch:
     inputs:
       package:
-        description: Root extension package
-        type: choice
-        options: ["."]
-        default: "."
-      target-branch:
-        description: Release target branch
-        type: string
-        default: main
-      match-mode:
-        description: Locate release by package.json version or exact tag
-        type: choice
-        options: [package-json, exact]
-        default: package-json
-      exact-tag:
-        description: Existing v<version> release tag when using exact
-        type: string
-        default: ""
-      restore-source:
-        description: Historical commit:<sha>, tag:<tag>, run:<id>, artifact:<id>, or GitHub URL
-        type: string
+        description: Select a publishable workspace package
         required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - packages/example
+      target-branch:
+        description: Branch used to resolve the package path and changelog
+        required: true
+        default: main
+        type: string
+      restore-source:
+        description:
+          "Historical source: commit:<sha>, tag:<tag>, run:<id>, artifact:<id>,
+          or github-url:<supported GitHub URL>"
+        required: true
+        type: string
+      match-mode:
+        description: Find release by package version or exact tag
+        required: true
+        default: package-json
+        type: choice
+        options:
+          - package-json
+          - exact
+      exact-tag:
+        description: Existing release tag to match when match-mode is exact
+        required: false
+        default: ""
+        type: string
       skip-finalized:
-        description: Skip existing finalized releases rather than modifying them
+        description: Skip finalized releases without modifying them (for bulk
+          live recovery)
+        required: true
+        default: false
         type: boolean
-        default: true
       dry-run:
-        description: Preview without restoring a release
-        type: boolean
+        description: Preview recovery without mutating the release or tag
+        required: true
         default: true
+        type: boolean
 
 permissions: {}
 
 jobs:
+  dispatch-input-summary:
+    name: "job: Workflow parameters"
+    permissions:
+      contents: read
+    uses: moyarich/reusable-workflows/.github/workflows/reusable_dispatch-input-summary.yml@main
+    with:
+      parameters-json: ${{ toJSON(inputs) }}
+      heading: "restore release · Dispatch parameters"
   restore:
     permissions:
       actions: read
       contents: write
       packages: read
       pull-requests: read
-    uses: moyarich/reusable-workflows/.github/workflows/reusable_restore-release.yml@main
+    uses: moyarich/reusable-workflows/.github/workflows/reusable_bulk-restore-release.yml@main
     with:
       package: ${{ inputs.package }}
       target-branch: ${{ inputs.target-branch }}
-      tag-prefix: v
       match-mode: ${{ inputs.match-mode }}
       exact-tag: ${{ inputs.exact-tag }}
       restore-source: ${{ inputs.restore-source }}
